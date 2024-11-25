@@ -1,79 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>C++ Editor - VSCode Style</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror/lib/codemirror.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror/theme/monokai.css">
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #editor-container {
-      width: 80%;
-      height: 70vh;
-      border: 1px solid #3c3c3c;
-      background-color: #1e1e1e;
-      border-radius: 5px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    }
-    .buttons {
-      margin-top: 15px;
-      display: flex;
-      gap: 10px;
-    }
-    button {
-      background-color: #007acc;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #005a9e;
-    }
-  </style>
-</head>
-<body>
-  <div id="editor-container">
-    <textarea id="editor">// Start coding in C++...</textarea>
-  </div>
-  <div class="buttons">
-    <button id="download">Download as .cpp</button>
-  </div>
-  
-  <script src="https://cdn.jsdelivr.net/npm/codemirror/lib/codemirror.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/codemirror/mode/clike/clike.js"></script>
-  <script>
-    // Initialize CodeMirror editor with VSCode-like style
-    const editor = CodeMirror.fromTextArea(document.getElementById("editor"), {
-      mode: "text/x-c++src",
-      lineNumbers: true,
-      theme: "monokai",
-      indentUnit: 4,
-      lineWrapping: true
-    });
+from flask import Flask, request, send_file
+import os
+import subprocess
 
-    // Download function
-    document.getElementById("download").addEventListener("click", () => {
-      const code = editor.getValue();
-      const blob = new Blob([code], { type: "text/plain" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "code.cpp";
-      a.click();
-    });
-  </script>
-</body>
-</html>
+app = Flask(__name__)
+
+@app.route("/compile", methods=["POST"])
+def compile_code():
+    data = request.json
+    code = data.get("code")
+    if not code:
+        return "No code provided", 400
+
+    # Save the code to a temporary .cpp file
+    code_file = "temp_code.cpp"
+    exe_file = "program.exe"
+    with open(code_file, "w") as f:
+        f.write(code)
+
+    # Compile the code using g++
+    try:
+        result = subprocess.run(
+            ["g++", code_file, "-o", exe_file],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        if result.returncode != 0:
+            return f"Compilation error: {result.stderr}", 400
+    except Exception as e:
+        return f"Error during compilation: {str(e)}", 500
+
+    # Send back the compiled .exe file
+    return send_file(exe_file, as_attachment=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)
