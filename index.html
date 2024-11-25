@@ -10,24 +10,14 @@
     body {
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 20px;
+      background-color: #1e1e1e;
+      color: #d4d4d4;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background-color: #1e1e1e;
-      color: #d4d4d4;
-    }
-    header {
-      width: 100%;
-      background-color: #007acc;
-      padding: 10px;
-      text-align: center;
-      color: white;
-      font-size: 24px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
     #editor-container {
-      margin-top: 20px;
       width: 80%;
       height: 70vh;
       border: 1px solid #3c3c3c;
@@ -56,7 +46,6 @@
   </style>
 </head>
 <body>
-  <header>C++ Editor - VSCode Style</header>
   <div id="editor-container">
     <textarea id="editor">// Start coding in C++...</textarea>
   </div>
